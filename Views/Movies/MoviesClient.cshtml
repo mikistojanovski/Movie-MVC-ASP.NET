@@ -1,42 +1,51 @@
-﻿@model IEnumerable<soprosopro.Models.Movie>
+﻿@using Microsoft.AspNetCore.Identity
+@using soprosopro.Areas.Identity.Data
+@model soprosopro.ViewModels.Filter
+@inject UserManager<soprosoproUser> UserManager
 
 @{
-    ViewData["Title"] = "Index";
+     ViewData["Title"] = "Movie Catalog";
 }
 
-<h1>Movies</h1>
+<h3 style="color:darkblue">Movie Catalog from @ViewBag.Message </h3>
+<hr/>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<form asp-controller="Movies" asp-action="MoviesClient"  asp-route-userID=@UserManager.GetUserId(User)>
+    <p>
+        Title: <input type="text" asp-for="searchTitle" />
+       
+        <input type="submit" value="Filter" />
+    </p>
+</form>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-             <th>
-                @Html.DisplayNameFor(model => model.Genres)
+                @Html.DisplayNameFor(model => model.Movies[0].Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Actors)
+                @Html.DisplayNameFor(model => model.Movies[0].Genres)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Directors)
+                @Html.DisplayNameFor(model => model.Movies[0].Actors)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Producers)
+                @Html.DisplayNameFor(model => model.Movies[0].Directors)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Movies[0].Producers)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-             <td>
+        @foreach (var item in Model.Movies)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
               @if (item.Genres!=null)
               {
                        foreach(var g in item.Genres){
@@ -80,12 +89,12 @@
                         
                     }
                 </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MovieId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MovieId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a>
-            </td>
-        </tr>
-}
+                <td>  
+                    <a asp-action="Edit" asp-route-id="@item.MovieId">Edit</a> |   @*error*@
+                    <a asp-action="Details" asp-route-id="@item.MovieId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using soprosopro    .Areas.Identity.Data;
 using soprosopro.Models;
+
 
 namespace soprosopro.Models
 {
-    public class soprosoproContext : DbContext
+    public class soprosoproContext : IdentityDbContext<soprosoproUser>
     {
         public soprosoproContext (DbContextOptions<soprosoproContext> options)
             : base(options)
@@ -19,13 +22,30 @@ namespace soprosopro.Models
         public DbSet<soprosopro.Models.Genre>? Genre { get; set; }
 
         public DbSet<soprosopro.Models.Person>? Person { get; set; }
+        public DbSet<Client> Client { get; set; }
         public DbSet<soprosopro.Models.MovieGenres>? MovieGenres { get; set; }
         public DbSet<soprosopro.Models.MovieActors>? MovieActors { get; set; }
         public DbSet<soprosopro.Models.MovieDirectors>? MovieDirectors { get; set; }
         public DbSet<soprosopro.Models.MovieProducers>? MovieProducers { get; set; }
 
+        public DbSet< ClientMovies>? ClientMovies { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<Movie>().ToTable("Movie");
+            builder.Entity<Genre>().ToTable("Genre");
+            builder.Entity<Person>().ToTable("Person");
+            builder.Entity<Client>().ToTable("Client");
+            builder.Entity<MovieGenres>().ToTable("MovieGenres");
+            builder.Entity<MovieDirectors>().ToTable("MovieDirectors");
+            builder.Entity<MovieActors>().ToTable("MovieActors");
+            builder.Entity<MovieProducers>().ToTable("MovieProducers");
+
+            builder.Entity<Movie>()
+                 .HasOne<Client>(p => p.Client)
+                 .WithMany(p => p.Movies)
+                 .HasForeignKey(p => p.ClientId);
+
             builder.Entity<MovieGenres>()
             .HasOne<Movie>(p => p.Movie)
             .WithMany(p => p.Genres)
@@ -69,7 +89,7 @@ namespace soprosopro.Models
           .WithMany(p => p.DM)
           .HasForeignKey(p => p.DirectorId);
             //.HasPrincipalKey(p => p.Id);
-
+            base.OnModelCreating(builder);
         }
     }
 }

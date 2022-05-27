@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -269,6 +270,38 @@ namespace soprosopro.Controllers
         private bool MovieExists(int id)
         {
           return (_context.Movie?.Any(e => e.MovieId == id)).GetValueOrDefault();
+        }
+        // GET: Movies/MoviesClient/5
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> MoviesClient(int? id, string? userID)
+        {
+            if (userID != null)
+            {
+                var tc = await _context.Client.FirstOrDefaultAsync(x => x.userId == userID);
+                id = tc.Id;
+            }
+            var userLoggedInId = HttpContext.Session.GetString("UserLoggedIn");
+           
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var client = await _context.Client
+                .FirstOrDefaultAsync(m => m.Id == id);
+            ViewBag.Message = client.userId;
+            IQueryable<Movie> mov = _context.Movie.Where(m => m.ClientId == id);
+            await _context.SaveChangesAsync();
+            if (client == null)
+            {
+                return NotFound();
+            }
+            var vm = new Filter
+            {
+                Movies = await mov.ToListAsync(),
+            };
+
+            return View(vm);
         }
     }
 }
